@@ -7,6 +7,7 @@ A Hermes Agent plugin that compresses LLM request context using [Headroom](https
 - **Compresses large tool outputs** before they hit the LLM (81%+ token reduction on real data)
 - **Preserves system prompts, file reads, browser snapshots, terminal output** — never compresses reference data
 - **Tracks cumulative savings** per session via `headroom_status` tool
+- **Shows savings in the runtime footer** — `🗜️ 562` tokens saved displayed alongside model/context%
 - **Registers `headroom_retrieve`** for CCR marker recovery
 - **Fail-open by default** — if Headroom throws, requests go through uncompressed
 
@@ -34,7 +35,11 @@ cp -r headroom ~/.hermes/plugins/
 hermes config set headroom.enabled true
 hermes plugins enable headroom
 
-# 4. Restart Hermes
+# 4. Enable footer display (optional — shows 🗜️ savings in context bar)
+hermes config set display.runtime_footer.enabled true
+hermes config set display.runtime_footer.fields '[model,context_pct,cwd,headroom_saved]'
+
+# 5. Restart Hermes
 ```
 
 ## Config
@@ -50,6 +55,11 @@ headroom:
   exclude_roles: system
   exclude_tools: browser_snapshot,read_file,read_terminal,terminal,execute_code
   api_modes: chat_completions,codex_responses,anthropic_messages
+
+display:
+  runtime_footer:
+    enabled: true
+    fields: [model, context_pct, cwd, headroom_saved]
 ```
 
 ## Tools
@@ -63,4 +73,5 @@ headroom:
 - Zero compression on system messages, file reads, browser snapshots, terminal output
 - Fail-open verified: Headroom errors pass through uncompressed
 - Edge cases verified: empty messages, missing fields, unknown api_mode, None content — all handled without crashing
+- Footer integration: `owl-alpha · 39% · ~ · 🗜️ 562` displays correctly
 - 10/10 automated tests pass
