@@ -17,6 +17,7 @@ from __future__ import annotations
 import copy
 import json
 import logging
+import os
 import re
 from typing import Any
 
@@ -292,6 +293,9 @@ def headroom_llm_request_middleware(request: dict[str, Any], **context: Any) -> 
     _session_stats["tokens_after_total"] += stats["tokens_after"]
     _session_stats["compressions"] += 1
 
+    # Write stats to file for the runtime footer to read
+    _write_headroom_stats_file()
+
     new_request = copy.deepcopy(request)
     new_request[field] = new_messages
     return {
@@ -463,6 +467,18 @@ _session_stats: dict[str, int] = {
     "tokens_after_total": 0,
     "compressions": 0,
 }
+
+_HEADROOM_STATS_FILE = os.path.expanduser("~/.hermes/.headroom_stats.json")
+
+
+def _write_headroom_stats_file() -> None:
+    """Write current session stats to a JSON file for the runtime footer."""
+    import json
+    try:
+        with open(_HEADROOM_STATS_FILE, "w") as f:
+            json.dump(_get_session_stats(), f)
+    except Exception:
+        pass
 
 
 def _get_session_stats() -> dict[str, int]:
