@@ -179,6 +179,16 @@ def _compress_messages(messages: list[dict[str, Any]], *, model: str) -> tuple[l
     return list(getattr(result, "messages", messages) or messages), stats
 
 
+def _excluded_roles() -> set[str]:
+    """Message roles that should never be compressed."""
+    raw = _headroom_cfg("exclude_roles", ["system"])
+    if isinstance(raw, str):
+        raw = [part.strip() for part in raw.split(",")]
+    if not isinstance(raw, (list, tuple, set)):
+        raw = ["system"]
+    return {str(item).strip().lower() for item in raw if str(item).strip()}
+
+
 def _excluded_tool_names() -> set[str]:
     """Tool names whose output should never be compressed.
 
