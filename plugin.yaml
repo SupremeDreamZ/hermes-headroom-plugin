@@ -1,0 +1,6 @@
+name: headroom
+version: "0.1.0"
+description: "Compress Hermes LLM request context with Headroom before provider calls, plus CCR retrieval."
+kind: standalone
+provides_tools:
+  - headroom_retrieve
