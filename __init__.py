@@ -381,7 +381,7 @@ def _proxy_urls() -> list[str]:
             text = str(value or "").strip().rstrip("/")
             if text:
                 urls.append(text)
-    return urls or ["http://127.0.0.1:8788", "http://127.0.0.1:8787"]
+    return urls
 
 
 def _retrieve_from_proxy(hash_key: str, query: str) -> dict[str, Any] | None:
