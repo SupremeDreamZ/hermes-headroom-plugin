@@ -4,7 +4,7 @@ A Hermes Agent plugin that compresses LLM request context using [Headroom](https
 
 ## What it does
 
-- **Compresses large tool outputs** before they hit the LLM (79%+ token reduction on real data)
+- **Compresses large tool outputs** before they hit the LLM (81%+ token reduction on real data)
 - **Preserves system prompts, file reads, browser snapshots, terminal output** — never compresses reference data
 - **Tracks cumulative savings** per session via `headroom_status` tool
 - **Registers `headroom_retrieve`** for CCR marker recovery
@@ -55,10 +55,12 @@ headroom:
 ## Tools
 
 - `headroom_retrieve` — Retrieve original uncompressed content behind CCR markers
-- `headroom_status` — Show cumulative session savings
+- `headroom_status` — Show cumulative session savings (tokens saved, compression count, ratio)
 
 ## Tested
 
-- 21,702 → 4,543 tokens (79.1% reduction) on realistic JSON tool output
-- Zero compression on system messages, file reads, browser snapshots
+- 21,441 → 4,025 tokens (81.2% reduction) on realistic JSON tool output
+- Zero compression on system messages, file reads, browser snapshots, terminal output
 - Fail-open verified: Headroom errors pass through uncompressed
+- Edge cases verified: empty messages, missing fields, unknown api_mode, None content — all handled without crashing
+- 10/10 automated tests pass
