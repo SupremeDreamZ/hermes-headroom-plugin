@@ -293,8 +293,16 @@ def headroom_llm_request_middleware(request: dict[str, Any], **context: Any) -> 
     _session_stats["tokens_after_total"] += stats["tokens_after"]
     _session_stats["compressions"] += 1
 
-    # Write stats to file for the runtime footer to read
+    # Write stats file for any external consumers
     _write_headroom_stats_file()
+
+    # Build a brief note that the agent can surface to the user
+    saved = stats["tokens_saved"]
+    ratio = stats["compression_ratio"]
+    _session_stats["_last_note"] = (
+        f"🗜️ Headroom saved {saved:,} tokens ({ratio:.1%} reduction) "
+        f"| session total: {_session_stats['tokens_saved_total']:,}"
+    )
 
     new_request = copy.deepcopy(request)
     new_request[field] = new_messages
@@ -507,6 +515,7 @@ def _handle_headroom_status(args: dict[str, Any], **kw: Any) -> str:
         })
 
     ratio = (saved / before * 100) if before > 0 else 0.0
+    last_note = stats.get("_last_note", "")
     return tool_result({
         "status": "ok",
         "compressions": comps,
@@ -515,6 +524,7 @@ def _handle_headroom_status(args: dict[str, Any], **kw: Any) -> str:
         "tokens_after_total": after,
         "savings_pct": round(ratio, 1),
         "message": f"Saved {saved:,} tokens across {comps} compression{'s' if comps != 1 else ''} ({ratio:.1f}% reduction)",
+        "last_note": last_note,
     })
 
 
