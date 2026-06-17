@@ -500,6 +500,29 @@ def _reset_session_stats() -> None:
     _session_stats["compressions"] = 0
 
 
+def _transform_llm_output(
+    response_text: str,
+    *,
+    session_id: str = "",
+    model: str = "",
+    platform: str = "",
+    **kw: Any,
+) -> str | None:
+    """Append headroom compression savings to the LLM response.
+
+    This is a ``transform_llm_output`` hook handler.  It returns the response
+    text unchanged when there is nothing to report, or the text with a brief
+    savings note appended when the session has recorded compressions.
+    """
+    stats = _get_session_stats()
+    saved = stats.get("tokens_saved_total", 0)
+    if saved <= 0:
+        return None  # nothing to report, leave response unchanged
+    comps = stats.get("compressions", 0)
+    note = stats.get("_last_note") or f"🗜️ Headroom saved {saved:,} tokens this session ({comps} compression{'s' if comps != 1 else ''})"
+    return f"{response_text}\n\n{note}"
+
+
 def _handle_headroom_status(args: dict[str, Any], **kw: Any) -> str:
     stats = _get_session_stats()
     saved = stats["tokens_saved_total"]
@@ -559,3 +582,4 @@ def register(ctx: Any) -> None:
         emoji="📊",
         override=True,
     )
+    ctx.register_hook("transform_llm_output", _transform_llm_output)
