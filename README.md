@@ -8,6 +8,7 @@ A Hermes Agent plugin that compresses LLM request context using [Headroom](https
 - **Preserves system prompts, file reads, browser snapshots, terminal output** — never compresses reference data
 - **Tracks cumulative savings** per session via `headroom_status` tool
 - **Shows savings in the runtime footer** — `🗜️ 562` tokens saved displayed alongside model/context%
+- **Appends savings note to LLM responses** via `transform_llm_output` hook — agent sees compression stats after each turn with activity
 - **Registers `headroom_retrieve`** for CCR marker recovery
 - **Fail-open by default** — if Headroom throws, requests go through uncompressed
 
@@ -74,4 +75,5 @@ display:
 - Fail-open verified: Headroom errors pass through uncompressed
 - Edge cases verified: empty messages, missing fields, unknown api_mode, None content — all handled without crashing
 - Footer integration: `owl-alpha · 39% · ~ · 🗜️ 562` displays correctly
+- `transform_llm_output` hook: savings note appended to response text when compressions occurred; returns None (unchanged) when no activity
 - 10/10 automated tests pass
